@@ -19,15 +19,21 @@ The core of this project is not a traditional cloud storage service, but an **In
 
 This project is licensed under the MIT License. For details, please see the [LICENSE](LICENSE) file.
 
-## Preview
+<details>
+<summary>點我展開 / 收合預覽圖（縮圖排列）</summary>
 
-![Preview 1](./.github/images/preview1.png)
-![Preview 2](./.github/images/preview2.png)
-![Preview 3](./.github/images/preview3.png)
-![Preview 4](./.github/images/preview4.png)
-![Preview 5](./.github/images/preview5.png)
-![Preview 6](./.github/images/preview6.png)
+<p>
+  <img src="./.github/images/preview1.png" width="200" />
+  <img src="./.github/images/preview2.png" width="200" />
+  <img src="./.github/images/preview3.png" width="200" />
+</p>
+<p>
+  <img src="./.github/images/preview4.png" width="200" />
+  <img src="./.github/images/preview5.png" width="200" />
+  <img src="./.github/images/preview6.png" width="200" />
+</p>
 
+</details>
 ---
 
 ## First Time Setup

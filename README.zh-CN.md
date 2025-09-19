@@ -19,6 +19,10 @@ TeleFileDB 是一個專為整理和搜尋在 Telegram 中收藏的檔案而設�
 本專案採用 MIT 授權協議。詳情請參閱 [LICENSE](LICENSE) 檔案。
 
 ## 預覽
+## Preview
+
+<details>
+<summary>點我展開 / 收合預覽圖</summary>
 
 ![預覽 1](./github/images/preview1.png)
 ![預覽 2](./github/images/preview2.png)
@@ -26,6 +30,9 @@ TeleFileDB 是一個專為整理和搜尋在 Telegram 中收藏的檔案而設�
 ![預覽 4](./github/images/preview4.png)
 ![預覽 5](./github/images/preview5.png)
 ![預覽 6](./github/images/preview6.png)
+
+</details>
+
 
 ---
 

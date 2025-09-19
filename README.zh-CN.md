@@ -20,12 +20,12 @@ TeleFileDB 是一個專為整理和搜尋在 Telegram 中收藏的檔案而設�
 
 ## 預覽
 
-![預覽 1](./.github/images/preview1.png)
-![預覽 2](./.github/images/preview2.png)
-![預覽 3](./.github/images/preview3.png)
-![預覽 4](./.github/images/preview4.png)
-![預覽 5](./.github/images/preview5.png)
-![預覽 6](./.github/images/preview6.png)
+![預覽 1](./github/images/preview1.png)
+![預覽 2](./github/images/preview2.png)
+![預覽 3](./github/images/preview3.png)
+![預覽 4](./github/images/preview4.png)
+![預覽 5](./github/images/preview5.png)
+![預覽 6](./github/images/preview6.png)
 
 ---
 

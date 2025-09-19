@@ -22,14 +22,15 @@ This project is licensed under the MIT License. For details, please see the [LIC
 ## Preview
 
 <details>
-<summary>點我展開 / 收合預覽圖</summary>
 
-![Preview 1](./.github/images/preview1.png)  
-![Preview 2](./.github/images/preview2.png)  
-![Preview 3](./.github/images/preview3.png)  
-![Preview 4](./.github/images/preview4.png)  
-![Preview 5](./.github/images/preview5.png)  
+
+![Preview 1](./.github/images/preview1.png)
+![Preview 2](./.github/images/preview2.png)
+![Preview 3](./.github/images/preview3.png)
+![Preview 4](./.github/images/preview4.png)
+![Preview 5](./.github/images/preview5.png)
 ![Preview 6](./.github/images/preview6.png)
+
 
 </details>
 ---

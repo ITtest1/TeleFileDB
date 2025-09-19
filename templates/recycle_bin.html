@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% from "recycle_bin_module/_flashed_messages.html" import render_flashed_messages %}
+{% from "folders_modules/_view_helpers.html" import render_list_view, render_grid_view, render_gallery_view %}
+
+{% block title %}Recycle Bin - TeleFileDB{% endblock %}
+
+{% from "index_module/_modals.html" import render_modals %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Recycle Bin</h2>
+
+    {{ render_flashed_messages() }}
+
+    <div class="mb-3">
+        <button type="button" class="btn btn-warning" id="emptyRecycleBinBtn">Empty Recycle Bin</button>
+        <div class="btn-group" role="group" aria-label="Bulk Actions">
+            <button type="button" class="btn btn-success" id="restoreSelectedBtn" disabled>Restore</button>
+            <button type="button" class="btn btn-danger" id="permanentDeleteSelectedBtn" disabled>Permanent Delete</button>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end mb-3">
+        <div class="d-flex align-items-center">
+            <form method="get" action="{{ url_for('views.recycle_bin') }}" class="me-2">
+                <input type="hidden" name="sort_by" value="{{ request.args.get('sort_by', '') }}">
+                <input type="hidden" name="sort_order" value="{{ request.args.get('sort_order', '') }}">
+                <input type="hidden" name="view_mode" value="{{ view_mode }}">
+                <select name="per_page" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="20" {% if per_page == '20' %}selected{% endif %}>20/page</option>
+                    <option value="50" {% if per_page == '50' %}selected{% endif %}>50/page</option>
+                    <option value="100" {% if per_page == '100' %}selected{% endif %}>100/page</option>
+                    <option value="200" {% if per_page == '200' %}selected{% endif %}>200/page</option>
+                    <option value="300" {% if per_page == '300' %}selected{% endif %}>300/page</option>
+                    <option value="400" {% if per_page == '400' %}selected{% endif %}>400/page</option>
+                    <option value="500" {% if per_page == '500' %}selected{% endif %}>500/page</option>
+                    <option value="700" {% if per_page == '700' %}selected{% endif %}>700/page</option>
+                    <option value="1000" {% if per_page == '1000' %}selected{% endif %}>1000/page</option>
+                    <option value="all" {% if per_page == 'all' %}selected{% endif %}>All</option>
+                </select>
+            </form>
+            <div class="btn-group" role="group" aria-label="View Toggle">
+                <a href="{{ url_for('views.recycle_bin', view_mode='list', page=page, per_page=per_page, sort_by=sort_by, sort_order=sort_order) }}" class="btn btn-outline-primary {% if view_mode == 'list' %}active{% endif %}" title="List View"><i class="bi bi-list-ul"></i></a>
+                <a href="{{ url_for('views.recycle_bin', view_mode='grid', page=page, per_page=per_page, sort_by=sort_by, sort_order=sort_order) }}" class="btn btn-outline-primary {% if view_mode == 'grid' %}active{% endif %}" title="Grid View"><i class="bi bi-grid-3x3-gap"></i></a>
+                <a href="{{ url_for('views.recycle_bin', view_mode='gallery', page=page, per_page=per_page, sort_by=sort_by, sort_order=sort_order) }}" class="btn btn-outline-primary {% if view_mode == 'gallery' %}active{% endif %}" title="Gallery View"><i class="bi bi-images"></i></a>
+            </div>
+        </div>
+    </div>
+
+    {% if view_mode == 'list' %}
+        {{ render_list_view(items, 'views.recycle_bin', sort_by, sort_order, None) }}
+    {% elif view_mode == 'grid' %}
+        {{ render_grid_view(items) }}
+    {% else %}
+        {{ render_gallery_view(items, is_recycle_bin=True) }}
+    {% endif %}
+
+    {% include 'shared_modules/_pagination_controls.html' %}
+
+{{ render_modals('') }}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/index_bulk_actions.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const emptyRecycleBinBtn = document.getElementById('emptyRecycleBinBtn');
+    if (emptyRecycleBinBtn) {
+        emptyRecycleBinBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to empty the recycle bin? This action cannot be undone.')) {
+                fetch('/empty_recycle_bin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An unexpected error occurred.');
+                });
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

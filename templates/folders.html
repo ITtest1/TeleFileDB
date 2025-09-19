@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from "folders_modules/_view_helpers.html" import render_gallery_view %}
+{% from "index_module/_modals.html" import render_modals %}
+
+{% block head %}
+    <title>TeleFileDB - Folders</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/gallery.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/checkbox.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+{% endblock %}
+
+{% block navbar_buttons %}
+    {% if parent_folder_id is not none %}
+    <a href="{{ url_for('folders', folder_id=parent_folder_id) }}" class="btn btn-secondary">Return</a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+      <h1 class="mt-5">Folders</h1>
+      <p>
+    <a href="/" class="btn btn-secondary">Back to Home</a>
+    <a href="/settings" class="btn btn-secondary">Settings</a>
+    <a href="{{ url_for('views.search') }}" class="btn btn-info">Search</a>
+    <a href="{{ url_for('views.recycle_bin') }}" class="btn btn-info">Recycle Bin</a>
+</p>
+
+{% include 'folders_modules/folder_controls.html' with context %}
+
+      {% if view_mode == 'list' %}
+          {% include 'folders_modules/list_view.html' with context %}
+      {% elif view_mode == 'grid' %}
+          {% from "folders_modules/_view_helpers.html" import render_grid_view %}
+          {{ render_grid_view(items) }}
+      {% else %}
+          {{ render_gallery_view(items) }}
+      {% endif %}
+
+{% include 'shared_modules/_pagination_controls.html' %}
+
+{{ render_modals(current_folder, current_folder_id) }}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    console.log("folders.html scripts loaded.");
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/index_bulk_actions.js') }}"></script>
+<script src="{{ url_for('static', filename='js/gallery_actions.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% macro render_search_results_table(results, query, path, file_type, min_size, min_size_unit, max_size, max_size_unit, start_date, end_date, sort_by, sort_order) %}
+{% if results %}
+<h2 class="mt-5">Search Results</h2>
+<div class="d-flex justify-content-between mb-3">
+  <div>
+    <button type="button" class="btn btn-info" id="copyLinksBtn">Copy Download Links</button>
+    <div class="btn-group" role="group" aria-label="Bulk Actions">
+      <button type="button" class="btn btn-primary" id="moveBtn" data-bs-toggle="modal" data-bs-target="#moveModal" disabled>Move</button>
+      <button type="button" class="btn btn-secondary" id="copyBtn" data-bs-toggle="modal" data-bs-target="#copyModal" disabled>Copy</button>
+      <button type="button" class="btn btn-danger" id="deleteBtn" data-bs-toggle="modal" data-bs-target="#deleteModal" disabled>Delete</button>
+    </div>
+  </div>
+</div>
+<table class="table table-hover table-list-view">
+  <thead>
+    <tr>
+      <th scope="col" class="th-checkbox"><input type="checkbox" class="form-check-input" id="selectAll"></th>
+      <th scope="col" class="th-name"><a href="{{ url_for('search_results', query=query, path=path, type=file_type, min_size=min_size, min_size_unit=min_size_unit, max_size=max_size, max_size_unit=max_size_unit, start_date=start_date, end_date=end_date, sort_by='filename', sort_order='asc' if sort_by == 'filename' and sort_order == 'desc' else 'desc') }}">Filename {% if sort_by == 'filename' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+      <th scope="col" class="th-folder"><a href="{{ url_for('search_results', query=query, path=path, type=file_type, min_size=min_size, min_size_unit=min_size_unit, max_size=max_size, max_size_unit=max_size_unit, start_date=start_date, end_date=end_date, sort_by='folder', sort_order='asc' if sort_by == 'folder' and sort_order == 'desc' else 'desc') }}">Folder {% if sort_by == 'folder' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+      <th scope="col" class="th-size"><a href="{{ url_for('search_results', query=query, path=path, type=file_type, min_size=min_size, min_size_unit=min_size_unit, max_size=max_size, max_size_unit=max_size_unit, start_date=start_date, end_date=end_date, sort_by='size', sort_order='asc' if sort_by == 'size' and sort_order == 'desc' else 'desc') }}">Size {% if sort_by == 'size' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+      <th scope="col" class="th-type"><a href="{{ url_for('search_results', query=query, path=path, type=file_type, min_size=min_size, min_size_unit=min_size_unit, max_size=max_size, max_size_unit=max_size_unit, start_date=start_date, end_date=end_date, sort_by='mime_type', sort_order='asc' if sort_by == 'mime_type' and sort_order == 'desc' else 'desc') }}">Type {% if sort_by == 'mime_type' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+      <th scope="col" class="th-date"><a href="{{ url_for('search_results', query=query, path=path, type=file_type, min_size=min_size, min_size_unit=min_size_unit, max_size=max_size, max_size_unit=max_size_unit, start_date=start_date, end_date=end_date, sort_by='upload_date', sort_order='asc' if sort_by == 'upload_date' and sort_order == 'desc' else 'desc') }}">Upload Date {% if sort_by == 'upload_date' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+      <th scope="col" class="th-actions">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in results %}
+      <tr>
+        <td><input type="checkbox" class="form-check-input item-checkbox" data-item-type="{{ item.type }}" data-item-id="{{ item.id }}" data-telegram-file-id="{{ item.file_id }}"></td>
+        <td class="td-name">
+          {% if item.type == 'folder' %}
+            <i class="bi bi-folder-fill"></i> {{ item.filename }}
+          {% else %}
+            <a href="/preview/{{ item.id }}" target="_blank" class="d-flex align-items-center">
+              {% if item.thumbnail_file_id %}
+                <img src="/download/{{ item.thumbnail_file_id }}" alt="Thumbnail" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
+              {% else %}
+                <i class="bi bi-file-earmark" style="font-size: 2rem; margin-right: 10px;"></i>
+              {% endif %}
+              {{ item.filename }}
+            </a>
+          {% endif %}
+        </td>
+        <td class="td-folder">{{ item.folder }}</td>
+        <td class="td-size">{{ item.size }}</td>
+        <td class="td-type">{{ item.mime_type or "N/A" }}</td>
+        <td class="td-date">{{ item.upload_date.strftime('%Y-%m-%d %H:%M:%S') if item.upload_date else "N/A" }}</td>
+        <td class="td-actions">
+          {% if item.type != 'folder' %}
+            <a href="/download/{{ item.file_id }}" class="btn btn-secondary btn-sm" target="_blank" title="Download"><i class="bi bi-download"></i></a>
+          {% endif %}
+          <button type="button" class="btn btn-sm btn-warning rename-btn" data-bs-toggle="modal" data-bs-target="#renameModal" data-item-type="{{ item.type }}" data-old-name="{{ item.filename }}" data-item-id="{{ item.id }}" title="Rename">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button type="button" class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-item-type="{{ item.type }}" data-item-id="{{ item.id }}" title="Delete">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  {% if query or path != 'root' or file_type or min_size or max_size or start_date or end_date %}
+    <p class="mt-3">No results found for your search criteria.</p>
+  {% endif %}
+{% endif %}
+{% endmacro %}

@@ -1,0 +1,10 @@
+
+Flask
+python-dotenv
+requests
+Pyrogram
+TGCrypto
+
+Pillow
+Flask-SQLAlchemy
+PyMySQL

@@ -1,0 +1,128 @@
+/* The main gallery container using CSS Columns for a Masonry layout */
+.photo-gallery {
+    /* Define the number of columns you want. This is the magic part. */
+    column-count: 5; /* Default for larger screens */
+    column-gap: 10px; /* The space between columns */
+}
+
+/* Each item in the gallery */
+.gallery-item {
+    display: inline-block; /* Important for column layout */
+    width: 100%;
+    margin-bottom: 10px; /* Space between items in the same column */
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    break-inside: avoid; /* Prevents items from breaking across columns */
+}
+
+/* The image itself */
+.gallery-item img {
+    width: 100%;
+    height: auto; /* Height is determined by the aspect ratio */
+    display: block;
+    border-radius: 8px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.gallery-item:hover img {
+    transform: scale(1.02); /* A more subtle hover effect */
+}
+
+/* Style for folder items */
+.gallery-item.folder-item {
+    text-align: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.gallery-item .folder-icon {
+    font-size: 4rem;
+    color: #0d6efd;
+}
+
+.gallery-item .folder-name {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+/* Style for video items to add a play icon */
+.gallery-item.video-item::after {
+    content: '▶';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    color: white;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+/* The file name overlay, now simpler for this layout */
+.file-name-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+    color: white;
+    padding: 10px;
+    font-size: 0.9rem;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+
+.file-name-overlay .file-name-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+}
+
+.file-name-overlay .telegram-link-btn {
+    color: white;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    padding: 0 5px;
+    font-size: 1.1rem;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.file-name-overlay .telegram-link-btn:hover {
+    opacity: 1;
+}
+
+
+/* Responsive adjustments for different screen sizes */
+@media (max-width: 1200px) {
+    .photo-gallery {
+        column-count: 4;
+    }
+}
+
+@media (max-width: 992px) {
+    .photo-gallery {
+        column-count: 3;
+    }
+}
+
+@media (max-width: 768px) {
+    .photo-gallery {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 576px) {
+    .photo-gallery {
+        column-count: 1;
+    }
+}

@@ -1,0 +1,122 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const selectAllCheckbox = document.getElementById('selectAll');
+      const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+      const moveBtn = document.getElementById('moveBtn');
+      const copyBtn = document.getElementById('copyBtn');
+      const deleteBtn = document.getElementById('deleteBtn');
+
+      function toggleBulkActionButtons() {
+          const anyChecked = Array.from(itemCheckboxes).some(c => c.checked);
+          moveBtn.disabled = !anyChecked;
+          copyBtn.disabled = !anyChecked;
+          deleteBtn.disabled = !anyChecked;
+      }
+
+      selectAllCheckbox.addEventListener('change', function(e) {
+          itemCheckboxes.forEach(checkbox => {
+              checkbox.checked = e.target.checked;
+          });
+          toggleBulkActionButtons();
+      });
+
+      itemCheckboxes.forEach(checkbox => {
+          checkbox.addEventListener('change', toggleBulkActionButtons);
+      });
+
+      // Modals
+      const moveModal = document.getElementById('moveModal');
+      moveModal.addEventListener('show.bs.modal', function (event) {
+          const selectedItems = Array.from(itemCheckboxes)
+              .filter(c => c.checked)
+              .map(c => ({
+                  id: c.dataset.itemId,
+                  type: c.dataset.itemType
+              }));
+          document.getElementById('moveItems').value = JSON.stringify(selectedItems);
+      });
+
+      const copyModal = document.getElementById('copyModal');
+      copyModal.addEventListener('show.bs.modal', function (event) {
+          const selectedItems = Array.from(itemCheckboxes)
+              .filter(c => c.checked)
+              .map(c => ({
+                  id: c.dataset.itemId,
+                  type: c.dataset.itemType
+              }));
+          document.getElementById('copyItems').value = JSON.stringify(selectedItems);
+      });
+
+      const deleteModal = document.getElementById('deleteModal');
+      deleteModal.addEventListener('show.bs.modal', function (event) {
+          const button = event.relatedTarget;
+          const itemType = button.getAttribute('data-item-type');
+          const itemIdOrPath = button.getAttribute('data-item-id');
+
+          const modalTitle = deleteModal.querySelector('.modal-title');
+          const deleteItemTypeInput = deleteModal.querySelector('#deleteItemType');
+          const deleteItemIdOrPathInput = deleteModal.querySelector('#deleteItemIdOrPath');
+
+          if (button.id === 'deleteBtn') { // Bulk delete
+              const selectedItems = Array.from(itemCheckboxes)
+                  .filter(c => c.checked)
+                  .map(c => ({
+                      id: c.dataset.itemId,
+                      type: c.dataset.itemType
+                  }));
+              modalTitle.textContent = 'Move ' + selectedItems.length + ' item(s) to Recycle Bin';
+              deleteItemIdOrPathInput.value = JSON.stringify(selectedItems);
+              deleteItemTypeInput.value = 'bulk'; // Set type for backend
+          } else { // Single delete
+              modalTitle.textContent = 'Move ' + itemType + ' to Recycle Bin';
+              deleteItemTypeInput.value = itemType;
+              deleteItemIdOrPathInput.value = itemIdOrPath;
+          }
+      });
+
+      document.getElementById('copyLinksBtn').addEventListener('click', function() {
+          var selectedFiles = [];
+          var checkboxes = document.querySelectorAll('.item-checkbox:checked');
+          for (var checkbox of checkboxes) {
+              if (checkbox.getAttribute('data-item-type') === 'file') {
+                  selectedFiles.push(checkbox.getAttribute('data-telegram-file-id'));
+              }
+          }
+
+          if (selectedFiles.length > 0) {
+              var links = selectedFiles.map(fileId => {
+                  console.log("Generating link for fileId:", fileId);
+                  return `${window.location.origin}/download/${fileId}`;
+              }).join('\n');
+              navigator.clipboard.writeText(links).then(function() {
+                  alert('Download links copied to clipboard!');
+              }, function(err) {
+                  console.error('Could not copy links: ', err);
+                  alert('Could not copy links. See console for details.');
+              });
+          } else {
+              alert('No files selected.');
+          }
+      });
+
+      var renameModal = document.getElementById('renameModal')
+      renameModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget
+        var itemType = button.getAttribute('data-item-type')
+        var oldName = button.getAttribute('data-old-name')
+        var itemId = button.getAttribute('data-item-id')
+
+        var modalTitle = renameModal.querySelector('.modal-title')
+        var newItemNameInput = renameModal.querySelector('#newItemName')
+        var renameItemTypeInput = renameModal.querySelector('#renameItemType')
+        var renameOldNameInput = renameModal.querySelector('#renameOldName')
+        var renameItemIdInput = renameModal.querySelector('#renameItemId')
+
+        modalTitle.textContent = 'Rename ' + itemType
+        newItemNameInput.value = oldName
+        renameItemTypeInput.value = itemType
+        renameOldNameInput.value = oldName
+        renameItemIdInput.value = itemId
+      })
+  });
+</script>

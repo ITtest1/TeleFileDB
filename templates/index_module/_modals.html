@@ -1,0 +1,219 @@
+{% macro render_modals(current_folder, current_folder_id) %}
+<!-- Rename Modal -->
+<div class="modal fade" id="renameModal" tabindex="-1" aria-labelledby="renameModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="renameModalLabel">Rename Item</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/rename" method="post">
+        <div class="modal-body">
+          <ul class="nav nav-tabs mb-3" id="renameTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="rename-new-name-tab" data-bs-toggle="tab" data-bs-target="#rename-new-name" type="button" role="tab" aria-controls="rename-new-name" aria-selected="true">New Name</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="rename-template-tab" data-bs-toggle="tab" data-bs-target="#rename-template" type="button" role="tab" aria-controls="rename-template" aria-selected="false">Template Rename</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="rename-find-replace-tab" data-bs-toggle="tab" data-bs-target="#rename-find-replace" type="button" role="tab" aria-controls="rename-find-replace" aria-selected="false">Find & Replace</button>
+            </li>
+          </ul>
+          <div class="tab-content" id="renameTabContent">
+            <div class="tab-pane fade show active" id="rename-new-name" role="tabpanel" aria-labelledby="rename-new-name-tab">
+              <div class="mb-3">
+                <label for="newItemName" class="form-label">New Name</label>
+                <input type="text" class="form-control" id="newItemName" name="new_name" required>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="rename-template" role="tabpanel" aria-labelledby="rename-template-tab">
+              <div class="mb-3">
+                <label for="renameTemplate" class="form-label">Template (e.g., [original_name] - Copy)</label>
+                <input type="text" class="form-control" id="renameTemplate" name="rename_template">
+                <small class="form-text text-muted">Available placeholders: [original_name], [extension], [counter]</small>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="rename-find-replace" role="tabpanel" aria-labelledby="rename-find-replace-tab">
+              <div class="mb-3">
+                <label for="findString" class="form-label">Find</label>
+                <input type="text" class="form-control" id="findString" name="find_string">
+              </div>
+              <div class="mb-3">
+                <label for="replaceString" class="form-label">Replace With</label>
+                <input type="text" class="form-control" id="replaceString" name="replace_string">
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="renameMethod" name="rename_method" value="new_name"> {# Hidden field to indicate rename method #}
+          <input type="hidden" id="renameItemType" name="item_type">
+          <input type="hidden" id="renameOldName" name="old_name">
+          <input type="hidden" id="renameItemId" name="item_id">
+          <input type="hidden" name="current_folder" value="{{ current_folder }}">
+          <input type="hidden" name="current_folder_id" value="{{ current_folder_id }}">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Rename</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Delete Item(s)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/delete" method="post">
+        <div class="modal-body">
+          <p>Are you sure you want to move the selected item(s) to the recycle bin?</p>
+          <input type="hidden" id="deleteItemType" name="item_type">
+          <input type="hidden" id="deleteItemIdOrPath" name="item_id_or_path">
+            <input type="hidden" name="current_folder" value="{{ current_folder }}">
+            <input type="hidden" name="current_folder_id" value="{{ current_folder_id }}">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Move to Recycle Bin</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Move Modal -->
+<div class="modal fade" id="moveModal" tabindex="-1" aria-labelledby="moveModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="moveModalLabel">Move Items</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/move" method="post">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="destinationFolder" class="form-label">Destination Folder</label>
+            <input type="text" class="form-control" id="destinationFolder" name="destination_folder" required>
+            <input type="hidden" id="moveItems" name="items">
+            <input type="hidden" name="current_folder" value="{{ current_folder }}">
+            <input type="hidden" name="current_folder_id" value="{{ current_folder_id }}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Move</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Copy Modal -->
+<div class="modal fade" id="copyModal" tabindex="-1" aria-labelledby="copyModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="copyModalLabel">Copy Items</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/copy" method="post">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="copyDestinationFolder" class="form-label">Destination Folder</label>
+            <input type="text" class="form-control" id="copyDestinationFolder" name="destination_folder" required>
+            <input type="hidden" id="copyItems" name="items">
+            <input type="hidden" name="current_folder" value="{{ current_folder }}">
+            <input type="hidden" name="current_folder_id" value="{{ current_folder_id }}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Copy</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Bulk Rename Modal -->
+<div class="modal fade" id="bulkRenameModal" tabindex="-1" aria-labelledby="bulkRenameModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="bulkRenameModalLabel">Rename Items</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/bulk_rename" method="post">
+        <div class="modal-body">
+          <ul class="nav nav-tabs mb-3" id="bulkRenameTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="bulk-rename-new-name-tab" data-bs-toggle="tab" data-bs-target="#bulk-rename-new-name" type="button" role="tab" aria-controls="bulk-rename-new-name" aria-selected="true">New Name</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="bulk-rename-template-tab" data-bs-toggle="tab" data-bs-target="#bulk-rename-template" type="button" role="tab" aria-controls="bulk-rename-template" aria-selected="false">Template Rename</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="bulk-rename-find-replace-tab" data-bs-toggle="tab" data-bs-target="#bulk-rename-find-replace" type="button" role="tab" aria-controls="bulk-rename-find-replace" aria-selected="false">Find & Replace</button>
+            </li>
+          </ul>
+          <div class="tab-content" id="bulkRenameTabContent">
+            <div class="tab-pane fade show active" id="bulk-rename-new-name" role="tabpanel" aria-labelledby="bulk-rename-new-name-tab">
+              <div class="mb-3">
+                <label for="bulkNewItemName" class="form-label">New Name (for all selected items)</label>
+                <input type="text" class="form-control" id="bulkNewItemName" name="new_name">
+              </div>
+            </div>
+            <div class="tab-pane fade" id="bulk-rename-template" role="tabpanel" aria-labelledby="bulk-rename-template-tab">
+              <div class="mb-3">
+                <label for="bulkRenameTemplate" class="form-label">Template (e.g., [original_name] - Copy, [counter])</label>
+                <input type="text" class="form-control" id="bulkRenameTemplate" name="rename_template">
+                <small class="form-text text-muted">Available placeholders: [original_name], [extension], [counter]</small>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="bulk-rename-find-replace" role="tabpanel" aria-labelledby="bulk-rename-find-replace-tab">
+              <div class="mb-3">
+                <label for="bulkFindString" class="form-label">Find</label>
+                <input type="text" class="form-control" id="bulkFindString" name="find_string">
+              </div>
+              <div class="mb-3">
+                <label for="bulkReplaceString" class="form-label">Replace With</label>
+                <input type="text" class="form-control" id="bulkReplaceString" name="replace_string">
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="bulkRenameMethod" name="rename_method" value="new_name"> {# Hidden field to indicate rename method #}
+          <input type="hidden" id="bulkRenameItems" name="items">
+          <input type="hidden" name="current_folder_id" value="{{ current_folder_id }}">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Rename Selected</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Gallery Action Modal -->
+<div class="modal fade" id="galleryActionModal" tabindex="-1" aria-labelledby="galleryActionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="galleryActionModalLabel">Choose Action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <a href="#" id="galleryActionPreview" class="btn btn-primary btn-lg" target="_blank">Preview</a>
+        <a href="#" id="galleryActionTelegram" class="btn btn-secondary btn-lg" target="_blank">View in Telegram</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %}

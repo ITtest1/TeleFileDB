@@ -1,0 +1,71 @@
+
+
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          {% for crumb in breadcrumbs %}
+            {% if loop.last %}
+              <li class="breadcrumb-item active" aria-current="page">{{ crumb.name }}</li>
+            {% else %}
+              <li class="breadcrumb-item">
+                {% if crumb.name == 'root' %}
+                  <a href="{{ url_for('views.folders') }}">{{ crumb.name }}</a>
+                {% else %}
+                  <a href="{{ url_for('views.folders', folder_id=crumb.id) }}">{{ crumb.name }}</a>
+                {% endif %}
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ol>
+      </nav>
+
+      <div class="card mt-3 mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Create New Folder</h5>
+          <form action="{{ url_for('views.create_folder_route') }}" method="post" onsubmit="console.log('Submitting folder creation:', { folder_name: document.getElementById('newFolderName').value, current_folder: document.querySelector('input[name="current_folder"]').value }); return true;">
+            <div class="mb-3">
+              <label for="newFolderName" class="form-label">Folder Name</label>
+              <input type="text" class="form-control" id="newFolderName" name="folder_name" required>
+              <input type="hidden" name="current_folder" value="{{ current_folder }}">
+            </div>
+            <button type="submit" class="btn btn-success">Create Folder</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between mb-3">
+        <div>
+          <div class="btn-group" role="group" aria-label="Bulk Actions">
+            <button type="button" class="btn btn-primary" id="moveBtn" data-bs-toggle="modal" data-bs-target="#moveModal" disabled>Move</button>
+            <button type="button" class="btn btn-secondary" id="copyBtn" data-bs-toggle="modal" data-bs-target="#copyModal" disabled>Copy</button>
+            <button type="button" class="btn btn-danger" id="deleteBtn" data-bs-toggle="modal" data-bs-target="#deleteModal" disabled>Delete</button>
+            <button type="button" class="btn btn-warning" id="bulkRenameBtn" data-bs-toggle="modal" data-bs-target="#bulkRenameModal" disabled>Rename</button>
+          </div>
+          {% if parent_folder_id is not none %}
+          <a href="{{ url_for('views.folders', folder_id=parent_folder_id) }}" class="btn btn-secondary">Return</a>
+          {% endif %}
+        </div>
+        <div class="d-flex align-items-center">
+            <form method="get" action="{{ url_for(request.endpoint, folder_id=current_folder_id) }}" class="me-2">
+                <input type="hidden" name="sort_by" value="{{ request.args.get('sort_by', '') }}">
+                <input type="hidden" name="sort_order" value="{{ request.args.get('sort_order', '') }}">
+                <input type="hidden" name="view_mode" value="{{ view_mode }}">
+                <select name="per_page" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="20" {% if per_page == '20' %}selected{% endif %}>20/page</option>
+                    <option value="50" {% if per_page == '50' %}selected{% endif %}>50/page</option>
+                    <option value="100" {% if per_page == '100' %}selected{% endif %}>100/page</option>
+                    <option value="200" {% if per_page == '200' %}selected{% endif %}>200/page</option>
+                    <option value="300" {% if per_page == '300' %}selected{% endif %}>300/page</option>
+                    <option value="400" {% if per_page == '400' %}selected{% endif %}>400/page</option>
+                    <option value="500" {% if per_page == '500' %}selected{% endif %}>500/page</option>
+                    <option value="700" {% if per_page == '700' %}selected{% endif %}>700/page</option>
+                    <option value="1000" {% if per_page == '1000' %}selected{% endif %}>1000/page</option>
+                    <option value="all" {% if per_page == 'all' %}selected{% endif %}>All</option>
+                </select>
+            </form>
+            <div class="btn-group" role="group" aria-label="View Toggle">
+              <a href="{{ url_for(request.endpoint, folder_id=current_folder_id, view_mode='list', page=page, per_page=per_page, sort_by=sort_by, sort_order=sort_order) }}" class="btn btn-outline-primary {% if view_mode == 'list' %}active{% endif %}" title="List View"><i class="bi bi-list-ul"></i></a>
+              <a href="{{ url_for(request.endpoint, folder_id=current_folder_id, view_mode='grid', page=page, per_page=per_page, sort_by=sort_by, sort_order=sort_order) }}" class="btn btn-outline-primary {% if view_mode == 'grid' %}active{% endif %}" title="Grid View"><i class="bi bi-grid-3x3-gap"></i></a>
+              <a href="{{ url_for(request.endpoint, folder_id=current_folder_id, view_mode='gallery', page=page, per_page=per_page, sort_by=sort_by, sort_order=sort_order) }}" class="btn btn-outline-primary {% if view_mode == 'gallery' %}active{% endif %}" title="Gallery View"><i class="bi bi-images"></i></a>
+            </div>
+        </div>
+      </div>

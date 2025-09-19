@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: telefiledb_app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+
+  listener:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: telefiledb_listener
+    restart: unless-stopped
+    command: python run_listener.py
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - app
+    ## --- To use the integrated database, uncomment the following two lines ---
+    # depends_on:
+    #   - db
+    # networks:
+    #   - telefiledb_network
+
+## --- To use the integrated database, uncomment this entire 'db' service ---
+#  db:
+#    image: mysql:8.0
+#    container_name: telefiledb_db
+#    restart: unless-stopped
+#    ## --- Add this command for compatibility with older clients (like some PyMySQL versions)
+#    command: [--default-authentication-plugin=mysql_native_password]
+#    environment:
+#      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} # Read from .env
+#      MYSQL_DATABASE: ${DB_NAME} # Read from .env
+#      MYSQL_USER: ${DB_USER} # Read from .env
+#      MYSQL_PASSWORD: ${DB_PASSWORD} # Read from .env
+#    ports:
+#      ## ---  Expose port to host for external access/debugging if needed
+#      - "3306:3306"
+#    volumes:
+#      - db_data:/var/lib/mysql
+#    networks:
+#      - telefiledb_network
+
+## --- To use a web-based DB management tool, uncomment this 'adminer' service ---
+## --- It depends on the 'db' service and 'telefiledb_network' being enabled ---
+#  adminer:
+#    image: adminer
+#    container_name: telefiledb_adminer
+#    restart: unless-stopped
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      - telefiledb_network
+
+## --- To use the integrated database, uncomment the following two blocks ---
+# networks:
+#   telefiledb_network:
+#     driver: bridge
+#
+# volumes:
+#   db_data:

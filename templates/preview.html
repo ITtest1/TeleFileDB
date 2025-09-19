@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Preview - {{ filename }}{% endblock %}
+
+{% block head %}
+<style>
+    body, html {
+        height: 100%;
+        margin: 0;
+        background-color: #f8f9fa;
+    }
+    .preview-container {
+        display: flex;
+        flex-direction: column; /* Arrange items vertically */
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        padding: 20px;
+    }
+    .preview-content {
+        max-width: 90%;
+        max-height: 90%;
+        text-align: center;
+    }
+    img, video {
+        max-width: 100%;
+        max-height: 80vh;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .action-bar {
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="preview-container">
+    <div class="preview-content">
+        <h3 class="mb-3">{{ filename }}</h3>
+        
+        {% if file_type == 'image' %}
+            <img src="{{ download_url }}" alt="{{ filename }}">
+        {% elif file_type == 'video' %}
+            <video controls preload="none" name="media" {% if thumbnail_file_id %}poster="{{ url_for('views.get_thumbnail', thumbnail_file_id=thumbnail_file_id) }}"{% endif %}>
+                <source src="{{ download_url }}" type="{{ mime_type }}">
+                Your browser does not support the video tag.
+            </video>
+        {% elif file_type == 'audio' %}
+            <audio controls preload="none">
+                <source src="{{ download_url }}" type="{{ mime_type }}">
+                Your browser does not support the audio tag.
+            </audio>
+        {% else %}
+            <p>This file type cannot be previewed directly.</p>
+        {% endif %}
+
+        <div class="action-bar">
+            <a href="{{ url_for('views.download_file', telegram_file_id=file_id) }}" class="btn btn-primary">Download File</a>
+            <button id="clear-cache-btn" class="btn btn-warning">Clear Cache</button>
+            <a href="javascript:history.back()" class="btn btn-secondary">Back to Files</a>
+        </div>
+    </div>
+
+    {% if file_type == 'video' or file_type == 'audio' %}
+    <div id="externalPlayerBar" class="card mt-3" style="max-width: 90%;">
+        <div class="card-header">
+            <h6 class="mb-0">Open with External Player</h6>
+        </div>
+        <div class="card-body d-flex justify-content-start align-items-center flex-wrap">
+            <a href="vlc://{{ direct_download_url }}" class="btn btn-outline-secondary player-btn" data-toggle="tooltip" title="Open in VLC">
+                <i class="fas fa-play-circle"></i> VLC
+            </a>
+            <a href="intent:{{ direct_download_url }}#Intent;package=com.mxtech.videoplayer.ad;type=video/mp4;end;" class="btn btn-outline-secondary player-btn" data-toggle="tooltip" title="Open in MX Player">
+                <i class="fas fa-play-circle"></i> MX Player
+            </a>
+            <a href="potplayer://{{ direct_download_url }}" class="btn btn-outline-secondary player-btn" data-toggle="tooltip" title="Open in PotPlayer">
+                <i class="fas fa-play-circle"></i> PotPlayer
+            </a>
+            <a href="nplayer-http://{{ direct_download_url.replace('http://', '').replace('https://', '') }}" class="btn btn-outline-secondary player-btn" data-toggle="tooltip" title="Open in nPlayer">
+                <i class="fas fa-play-circle"></i> nPlayer
+            </a>
+            <a href="infuse://x-callback-url/play?url={{ direct_download_url }}" class="btn btn-outline-secondary player-btn" data-toggle="tooltip" title="Open in Infuse">
+                <i class="fas fa-play-circle"></i> Infuse
+            </a>
+            <a href="iina://weblink?url={{ direct_download_url }}" class="btn btn-outline-secondary player-btn" data-toggle="tooltip" title="Open in IINA">
+                <i class="fas fa-play-circle"></i> IINA
+            </a>
+            <a href="mvp://{{ direct_download_url }}" class="btn btn-outline-secondary player-btn" data-toggle="tooltip" title="Open in MPV">
+                <i class="fas fa-play-circle"></i> MPV
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+document.getElementById('clear-cache-btn').addEventListener('click', function() {
+    const fileId = "{{ file_id }}";
+    const thumbnailFileId = "{{ thumbnail_file_id }}";
+
+    const filesToClear = [fileId];
+    if (thumbnailFileId) {
+        filesToClear.push(thumbnailFileId);
+    }
+
+    let clearedCount = 0;
+    filesToClear.forEach(id => {
+        fetch("{{ url_for('admin.clear_file_cache_route') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ file_id: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                clearedCount++;
+                if (clearedCount === filesToClear.length) {
+                    alert('Cache cleared successfully for file and thumbnail.');
+                    location.reload();
+                }
+            } else {
+                alert('Error clearing cache for file ID: ' + id + ". " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while clearing the cache for file ID: ' + id);
+        });
+    });
+});
+</script>
+{% endblock %}

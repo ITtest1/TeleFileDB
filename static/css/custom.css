@@ -1,0 +1,34 @@
+/* Adjustments for view buttons */
+.btn-group[aria-label="View Toggle"] {
+    align-items: flex-start; /* Align items to the start to prevent vertical stretching */
+    flex-wrap: wrap; /* Allow buttons to wrap to the next line if space is insufficient */
+}
+
+.btn-group[aria-label="View Toggle"] .btn {
+    flex: 0 1 auto; /* Prevent horizontal stretching, allow content-based width */
+    white-space: normal; /* Allow text to wrap */
+    word-break: break-word; /* Break long words */
+}
+
+/* Styles for External Player Bar */
+.player-btn {
+    margin-right: 10px;
+    margin-bottom: 10px; /* Add space for wrapping */
+}
+
+/* Ensure tooltips are visible */
+.tooltip-inner {
+    background-color: #343a40; /* Dark background for better contrast */
+    color: #fff;
+}
+
+.tooltip.bs-tooltip-top .arrow::before {
+    border-top-color: #343a40;
+}
+
+/* Force wrapping for long paths in the Folder column */
+.table-list-view th:nth-child(6),
+.table-list-view .td-folder {
+    overflow-wrap: break-word;
+    word-break: normal;
+}

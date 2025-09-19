@@ -1,0 +1,56 @@
+{% macro render_file_list_table(files, sort_by, sort_order) %}
+<h2 class="mt-5">Files</h2>
+<div class="d-flex justify-content-between mb-3">
+  <div>
+    <button type="button" class="btn btn-info" id="copyLinksBtn">Copy Download Links</button>
+    <div class="btn-group" role="group" aria-label="Bulk Actions">
+      <button type="button" class="btn btn-primary" id="moveBtn" data-bs-toggle="modal" data-bs-target="#moveModal" disabled>Move</button>
+      <button type="button" class="btn btn-secondary" id="copyBtn" data-bs-toggle="modal" data-bs-target="#copyModal" disabled>Copy</button>
+      <button type="button" class="btn btn-danger" id="deleteBtn" data-bs-toggle="modal" data-bs-target="#deleteModal" disabled>Delete</button>
+    </div>
+  </div>
+</div>
+<table class="table table-hover table-list-view">
+  <thead>
+    <tr>
+      <th scope="col" class="th-checkbox"><input type="checkbox" class="form-check-input" id="selectAll"></th>
+      <th scope="col" class="th-name"><a href="{{ url_for('index', sort_by='filename', sort_order='asc' if sort_by == 'filename' and sort_order == 'desc' else 'desc') }}">Filename {% if sort_by == 'filename' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+      <th scope="col" class="th-folder"><a href="{{ url_for('index', sort_by='folder', sort_order='asc' if sort_by == 'folder' and sort_order == 'desc' else 'desc') }}">Folder {% if sort_by == 'folder' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+      <th scope="col" class="th-size"><a href="{{ url_for('index', sort_by='size', sort_order='asc' if sort_by == 'size' and sort_order == 'desc' else 'desc') }}">Size {% if sort_by == 'size' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+      <th scope="col" class="th-type"><a href="{{ url_for('index', sort_by='mime_type', sort_order='asc' if sort_by == 'mime_type' and sort_order == 'desc' else 'desc') }}">Type {% if sort_by == 'mime_type' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+      <th scope="col" class="th-date"><a href="{{ url_for('index', sort_by='date', sort_order='asc' if sort_by == 'date' and sort_order == 'desc' else 'desc') }}">Upload Date {% if sort_by == 'date' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+      <th scope="col" class="th-actions">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for file in files %}
+    <tr>
+      <td><input type="checkbox" class="form-check-input item-checkbox" data-item-type="file" data-item-id="{{ file[0] }}" data-telegram-file-id="{{ file[2] }}"></td>
+      <td class="td-name">
+        <a href="/preview/{{ file[0] }}" target="_blank" class="d-flex align-items-center">
+        {% if file[7] %}
+          <img src="/download/{{ file[7] }}" alt="Thumbnail" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
+        {% else %}
+          <i class="bi bi-file-earmark" style="font-size: 2rem; margin-right: 10px;"></i>
+        {% endif %}
+        {{ file[1] }}
+        </a>
+      </td>
+      <td class="td-folder">{{ file[3] }}</td>
+      <td class="td-size">{{ file[4] }}</td>
+      <td class="td-type">{{ file[5] or "N/A" }}</td>
+      <td class="td-date">{{ file[6].strftime('%Y-%m-%d %H:%M:%S') if file[6] else "N/A" }}</td>
+      <td class="td-actions">
+        <a href="/download/{{ file[2] }}" class="btn btn-secondary btn-sm" target="_blank" title="Download"><i class="bi bi-download"></i></a>
+        <button type="button" class="btn btn-sm btn-warning rename-btn" data-bs-toggle="modal" data-bs-target="#renameModal" data-item-type="file" data-old-name="{{ file[1] }}" data-item-id="{{ file[0] }}" title="Rename">
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-item-type="file" data-item-id="{{ file[0] }}" title="Delete">
+          <i class="bi bi-trash"></i>
+        </button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endmacro %}

@@ -1,0 +1,60 @@
+{% macro render_recycle_bin_table(deleted_items, sort_by, sort_order) %}
+{% if deleted_items %}
+<form id="recycleBinForm" method="POST">
+    <div class="mb-3">
+        <button type="button" class="btn btn-info" id="copyLinksBtn">Copy Download Links</button>
+        <button type="button" class="btn btn-success" id="restoreSelectedBtn" disabled>Restore Selected</button>
+        <button type="button" class="btn btn-danger" id="permanentDeleteSelectedBtn" disabled>Permanently Delete Selected</button>
+        <button type="submit" formaction="{{ url_for('empty_recycle_bin_route') }}" class="btn btn-warning" onclick="return confirm('Are you sure you want to empty the recycle bin? This action cannot be undone.');">Empty Recycle Bin</button>
+    </div>
+
+            <table class="table table-hover table-list-view">
+        <thead>
+            <tr>
+                <th class="th-checkbox"><input type="checkbox" id="selectAll"></th>
+                <th class="th-name"><a href="{{ url_for('recycle_bin', sort_by='filename', sort_order='asc' if sort_by == 'filename' and sort_order == 'desc' else 'desc') }}">Filename {% if sort_by == 'filename' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+                <th class="th-folder"><a href="{{ url_for('recycle_bin', sort_by='folder', sort_order='asc' if sort_by == 'folder' and sort_order == 'desc' else 'desc') }}">Folder {% if sort_by == 'folder' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+                <th class="th-size"><a href="{{ url_for('recycle_bin', sort_by='size', sort_order='asc' if sort_by == 'size' and sort_order == 'desc' else 'desc') }}">Size {% if sort_by == 'size' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+                <th class="th-type"><a href="{{ url_for('recycle_bin', sort_by='mime_type', sort_order='asc' if sort_by == 'mime_type' and sort_order == 'desc' else 'desc') }}">MIME Type {% if sort_by == 'mime_type' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+                <th class="th-date"><a href="{{ url_for('recycle_bin', sort_by='upload_date', sort_order='asc' if sort_by == 'upload_date' and sort_order == 'desc' else 'desc') }}">Upload Date {% if sort_by == 'upload_date' %}<i class="bi {% if sort_order == 'asc' %}bi-arrow-up{% else %}bi-arrow-down{% endif %}></i>{% endif %}</a></th>
+                <th class="th-actions">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in deleted_items %}
+            <tr>
+                <td><input type="checkbox" class="item-checkbox" name="selected_items" value="{{ item[0] }}" data-item-type="{{ 'folder' if item[5] == 'application/x-folder' else 'file' }}"></td>
+                <td class="td-name">
+                    <a href="/preview/{{ item[0] }}" target="_blank" class="d-flex align-items-center">
+                        {% if item[7] %}
+                            <img src="/download/{{ item[7] }}" alt="Thumbnail" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
+                        {% else %}
+                            <i class="bi bi-file-earmark" style="font-size: 2rem; margin-right: 10px;"></i>
+                        {% endif %}
+                        {{ item[1] }}
+                    </a>
+                </td>
+                <td>{{ item[3] }}</td>
+                <td>{{ item[4] }}</td>
+                <td>{{ item[5] }}</td>
+                <td>{{ item[6].strftime('%Y-%m-%d %H:%M:%S') if item[6] else "N/A" }}</td>
+                <td>
+                    <form action="{{ url_for('restore_items_route') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="item_ids" value='{{ ([{"id": item[0], "type": "folder" if item[5] == "application/x-folder" else "file"}])|tojson|safe }}'>
+                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Are you sure you want to restore this item?');" title="Restore"><i class="bi bi-arrow-counterclockwise"></i></button>
+                    </form>
+                    <a href="/download/{{ item[2] }}" class="btn btn-sm btn-secondary" target="_blank" title="Download"><i class="bi bi-download"></i></a>
+                    <form action="{{ url_for('permanent_delete_items_route') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="item_ids" value='{{ ([{"id": item[0], "type": "folder" if item[5] == "application/x-folder" else "file"}])|tojson|safe }}'>
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to permanently delete this item? This action cannot be undone.');" title="Permanently Delete"><i class="bi bi-trash"></i></button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</form>
+{% else %}
+<p>Recycle bin is empty.</p>
+{% endif %}
+{% endmacro %}

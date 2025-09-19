@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - TeleFileDB{% endblock %}
+
+{% block content %}
+<h1 class="mt-5">Settings</h1>
+<p><a href="/admin_logout" class="btn btn-danger">Logout</a></p>
+
+<div class="card mt-3">
+  <div class="card-body">
+    <h5 class="card-title">Database Management</h5>
+    <form action="/export_db" method="post" class="d-inline">
+      <button type="submit" class="btn btn-primary">Export Database</button>
+    </form>
+    <form action="/import_db" method="post" enctype="multipart/form-data" class="d-inline ms-2">
+      <input type="file" name="db_file" class="form-control-file d-inline w-auto">
+      <button type="submit" class="btn btn-primary">Import Database</button>
+    </form>
+  </div>
+</div>
+
+
+
+<div class="card mt-3">
+  <div class="card-body">
+    <h5 class="card-title">Application Control</h5>
+    <form action="/restart_app" method="post">
+      <button type="submit" class="btn btn-danger">Restart Application</button>
+    </form>
+  </div>
+</div>
+
+<div class="card mt-3">
+  <div class="card-body">
+    <h5 class="card-title">Upload and Cache Settings</h5>
+    <form action="/update_settings" method="post">
+      
+      <div class="mb-3">
+        <label for="cacheMaxSize" class="form-label">Cache Max Size (GB)</label>
+        <input type="number" class="form-control" id="cacheMaxSize" name="CACHE_MAX_SIZE_GB" value="{{ config.CACHE_MAX_SIZE_GB }}" step="0.1" min="0">
+      </div>
+      <div class="mb-3">
+        <label for="cacheMaxAge" class="form-label">Cache Max Age (minutes)</label>
+        <input type="number" class="form-control" id="cacheMaxAge" name="CACHE_MAX_AGE_MINUTES" value="{{ config.CACHE_MAX_AGE_MINUTES }}" min="0">
+      </div>
+      <div class="mb-3">
+        <label for="thumbnailWidth" class="form-label">Thumbnail Width (pixels)</label>
+        <input type="number" class="form-control" id="thumbnailWidth" name="THUMBNAIL_WIDTH" value="{{ config.THUMBNAIL_WIDTH }}" min="1">
+      </div>
+      <div class="mb-3">
+        <label for="thumbnailHeight" class="form-label">Thumbnail Height (pixels)</label>
+        <input type="number" class="form-control" id="thumbnailHeight" name="THUMBNAIL_HEIGHT" value="{{ config.THUMBNAIL_HEIGHT }}" min="1">
+      </div>
+      <div class="mb-3">
+        <p>Current Cache Usage: {{ current_cache_size }}</p>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Settings</button>
+    </form>
+  </div>
+</div>
+
+<div class="card mt-3">
+  <div class="card-body">
+    <h5 class="card-title">Danger Zone</h5>
+    <form action="{{ url_for('admin.clear_database_route') }}" method="post" onsubmit="return confirm('Are you absolutely sure you want to clear the entire database? This action cannot be undone.');">
+      <button type="submit" class="btn btn-danger">Clear Entire Database</button>
+    </form>
+    <form action="{{ url_for('admin.clear_cache_route') }}" method="post" onsubmit="return confirm('Are you sure you want to clear the cache? This will delete all cached files.');" class="mt-2">
+      <button type="submit" class="btn btn-warning">Clear Cache</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

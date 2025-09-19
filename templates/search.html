@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% from "index_module/_modals.html" import render_modals %}
+{% from "folders_modules/_view_helpers.html" import render_list_view, render_grid_view, render_gallery_view %}
+
+{% block title %}Search - TeleFileDB{% endblock %}
+
+{% block content %}
+<h1 class="mt-5">Search</h1>
+
+<div class="card mt-3">
+  <div class="card-body">
+    <h5 class="card-title">Search Files and Folders</h5>
+    <form action="{{ url_for('views.search_results') }}" method="get">
+      <div class="mb-3">
+        <label for="query" class="form-label">Search Query</label>
+        <input type="text" class="form-control" id="query" name="query" placeholder="Enter keywords or file name" value="{{ query if query else '' }}">
+      </div>
+      <div class="mb-3">
+        <label for="path" class="form-label">Search Path (e.g., root/documents)</label>
+        <input type="text" class="form-control" id="path" name="path" value="{{ path if path else 'root' }}">
+      </div>
+      <div class="mb-3">
+        <label for="type" class="form-label">File Type</label>
+        <select class="form-select" id="type" name="type">
+          <option value="" {% if not file_type %}selected{% endif %}>All</option>
+          <option value="folder" {% if file_type == 'folder' %}selected{% endif %}>Folder</option>
+          <option value="image" {% if file_type == 'image' %}selected{% endif %}>Image</option>
+          <option value="video" {% if file_type == 'video' %}selected{% endif %}>Video</option>
+          <option value="audio" {% if file_type == 'audio' %}selected{% endif %}>Audio</option>
+          <option value="document" {% if file_type == 'document' %}selected{% endif %}>Document</option>
+          <option value="archive" {% if file_type == 'archive' %}selected{% endif %}>Archive</option>
+          <option value="other" {% if file_type == 'other' %}selected{% endif %}>Other</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="min_size" class="form-label">Min Size</label>
+        <div class="input-group">
+          <input type="number" class="form-control" id="min_size" name="min_size" min="0" value="{{ min_size if min_size else '' }}">
+          <select class="form-select" id="min_size_unit" name="min_size_unit">
+            <option value="B" {% if min_size_unit == 'B' %}selected{% endif %}>B</option>
+            <option value="KB" {% if min_size_unit == 'KB' %}selected{% endif %}>KB</option>
+            <option value="MB" {% if not min_size_unit or min_size_unit == 'MB' %}selected{% endif %}>MB</option>
+            <option value="GB" {% if min_size_unit == 'GB' %}selected{% endif %}>GB</option>
+          </select>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="max_size" class="form-label">Max Size</label>
+        <div class="input-group">
+          <input type="number" class="form-control" id="max_size" name="max_size" min="0" value="{{ max_size if max_size else '' }}">
+          <select class="form-select" id="max_size_unit" name="max_size_unit">
+            <option value="B" {% if max_size_unit == 'B' %}selected{% endif %}>B</option>
+            <option value="KB" {% if min_size_unit == 'KB' %}selected{% endif %}>KB</option>
+            <option value="MB" {% if not max_size_unit or max_size_unit == 'MB' %}selected{% endif %}>MB</option>
+            <option value="GB" {% if max_size_unit == 'GB' %}selected{% endif %}>GB</option>
+          </select>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="start_date" class="form-label">Start Date</label>
+        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date if start_date else '' }}">
+      </div>
+      <div class="mb-3">
+        <label for="end_date" class="form-label">End Date</label>
+        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date if end_date else '' }}">
+      </div>
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+  </div>
+</div>
+
+<div class="mb-3">
+    <div class="btn-group" role="group" aria-label="Bulk Actions">
+        <button type="button" class="btn btn-primary" id="moveBtn" data-bs-toggle="modal" data-bs-target="#moveModal" disabled>Move</button>
+        <button type="button" class="btn btn-primary" id="copyBtn" data-bs-toggle="modal" data-bs-target="#copyModal" disabled>Copy</button>
+        <button type="button" class="btn btn-danger" id="deleteBtn" data-bs-toggle="modal" data-bs-target="#deleteModal" disabled>Delete</button>
+        <button type="button" class="btn btn-warning" id="bulkRenameBtn" data-bs-toggle="modal" data-bs-target="#bulkRenameModal" disabled>Rename</button>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end mb-3">
+    <div class="d-flex align-items-center">
+        <form method="get" action="{{ url_for('views.search_results') }}" class="me-2">
+            <input type="hidden" name="query" value="{{ query }}">
+            <input type="hidden" name="path" value="{{ path }}">
+            <input type="hidden" name="type" value="{{ file_type }}">
+            <input type="hidden" name="min_size" value="{{ min_size }}">
+            <input type="hidden" name="min_size_unit" value="{{ min_size_unit }}">
+            <input type="hidden" name="max_size" value="{{ max_size }}">
+            <input type="hidden" name="max_size_unit" value="{{ max_size_unit }}">
+            <input type="hidden" name="start_date" value="{{ start_date }}">
+            <input type="hidden" name="end_date" value="{{ end_date }}">
+            <input type="hidden" name="sort_by" value="{{ sort_by }}">
+            <input type="hidden" name="sort_order" value="{{ sort_order }}">
+            <input type="hidden" name="view_mode" value="{{ view_mode }}">
+            <select name="per_page" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="20" {% if per_page == '20' %}selected{% endif %}>20/page</option>
+                <option value="50" {% if per_page == '50' %}selected{% endif %}>50/page</option>
+                <option value="100" {% if per_page == '100' %}selected{% endif %}>100/page</option>
+                <option value="200" {% if per_page == '200' %}selected{% endif %}>200/page</option>
+                <option value="300" {% if per_page == '300' %}selected{% endif %}>300/page</option>
+                <option value="400" {% if per_page == '400' %}selected{% endif %}>400/page</option>
+                <option value="500" {% if per_page == '500' %}selected{% endif %}>500/page</option>
+                <option value="700" {% if per_page == '700' %}selected{% endif %}>700/page</option>
+                <option value="1000" {% if per_page == '1000' %}selected{% endif %}>1000/page</option>
+                <option value="all" {% if per_page == 'all' %}selected{% endif %}>All</option>
+            </select>
+        </form>
+        <div class="btn-group" role="group" aria-label="View Toggle">
+            {% set args = request.args.to_dict() %}
+            {% do args.update({'view_mode': 'list'}) %}
+            <a href="{{ url_for('views.search_results', **args) }}" class="btn btn-outline-primary {% if view_mode == 'list' %}active{% endif %}" title="List View"><i class="bi bi-list-ul"></i></a>
+            {% do args.update({'view_mode': 'grid'}) %}
+            <a href="{{ url_for('views.search_results', **args) }}" class="btn btn-outline-primary {% if view_mode == 'grid' %}active{% endif %}" title="Grid View"><i class="bi bi-grid-3x3-gap"></i></a>
+            {% do args.update({'view_mode': 'gallery'}) %}
+            <a href="{{ url_for('views.search_results', **args) }}" class="btn btn-outline-primary {% if view_mode == 'gallery' %}active{% endif %}" title="Gallery View"><i class="bi bi-images"></i></a>
+        </div>
+    </div>
+</div>
+
+{% if view_mode == 'list' %}
+    {{ render_list_view(items, 'views.search_results', sort_by, sort_order, None) }}
+{% elif view_mode == 'grid' %}
+    {{ render_grid_view(items) }}
+{% else %}
+    {{ render_gallery_view(items) }}
+{% endif %}
+
+{% include 'shared_modules/_pagination_controls.html' %}
+
+{{ render_modals(path) }}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/index_bulk_actions.js') }}"></script>
+{% endblock %}

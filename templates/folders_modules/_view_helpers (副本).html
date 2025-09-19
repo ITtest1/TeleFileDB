@@ -1,0 +1,231 @@
+{% macro render_list_view(items, subfolders, endpoint, sort_by, sort_order, current_folder_id) %}
+<table class="table table-hover table-list-view">
+    <thead>
+        <tr>
+            <th style="width: 5%;"><input type="checkbox" id="selectAll"></th>
+            <th style="width: 45%;">
+                {% set args = request.args.to_dict() %}
+                {% if sort_by == 'name' %}
+                    {% if sort_order == 'asc' %}
+                        {% do args.update({'sort_order': 'desc'}) %}
+                    {% elif sort_order == 'desc' %}
+                        {% do args.pop('sort_by', None) %}
+                        {% do args.pop('sort_order', None) %}
+                    {% else %}
+                        {% do args.update({'sort_order': 'asc'}) %}
+                    {% endif %}
+                {% else %}
+                    {% do args.update({'sort_by': 'name'}) %}
+                    {% do args.update({'sort_order': 'asc'}) %}
+                {% endif %}
+                {% do args.pop('folder_id', None) %}
+                <a href="{{ url_for(endpoint, folder_id=current_folder_id, **args) }}">Name</a>
+            </th>
+            <th style="width: 5%;">
+                {% set args = request.args.to_dict() %}
+                {% if sort_by == 'type' %}
+                    {% if sort_order == 'asc' %}
+                        {% do args.update({'sort_order': 'desc'}) %}
+                    {% elif sort_order == 'desc' %}
+                        {% do args.pop('sort_by', None) %}
+                        {% do args.pop('sort_order', None) %}
+                    {% else %}
+                        {% do args.update({'sort_order': 'asc'}) %}
+                    {% endif %}
+                {% else %}
+                    {% do args.update({'sort_by': 'type'}) %}
+                    {% do args.update({'sort_order': 'asc'}) %}
+                {% endif %}
+                {% do args.pop('folder_id', None) %}
+                <a href="{{ url_for(endpoint, folder_id=current_folder_id, **args) }}">Type</a>
+            </th>
+            <th style="width: 5%;">
+                {% set args = request.args.to_dict() %}
+                {% if sort_by == 'size' %}
+                    {% if sort_order == 'asc' %}
+                        {% do args.update({'sort_order': 'desc'}) %}
+                    {% elif sort_order == 'desc' %}
+                        {% do args.pop('sort_by', None) %}
+                        {% do args.pop('sort_order', None) %}
+                    {% else %}
+                        {% do args.update({'sort_order': 'asc'}) %}
+                    {% endif %}
+                {% else %}
+                    {% do args.update({'sort_by': 'size'}) %}
+                    {% do args.update({'sort_order': 'asc'}) %}
+                {% endif %}
+                {% do args.pop('folder_id', None) %}
+                <a href="{{ url_for(endpoint, folder_id=current_folder_id, **args) }}">Size</a>
+            </th>
+            <th style="width: 15%;">
+                {% set args = request.args.to_dict() %}
+                {% if sort_by == 'date' %}
+                    {% if sort_order == 'asc' %}
+                        {% do args.update({'sort_order': 'desc'}) %}
+                    {% elif sort_order == 'desc' %}
+                        {% do args.pop('sort_by', None) %}
+                        {% do args.pop('sort_order', None) %}
+                    {% else %}
+                        {% do args.update({'sort_order': 'asc'}) %}
+                    {% endif %}
+                {% else %}
+                    {% do args.update({'sort_by': 'date'}) %}
+                    {% do args.update({'sort_order': 'asc'}) %}
+                {% endif %}
+                {% do args.pop('folder_id', None) %}
+                <a href="{{ url_for(endpoint, folder_id=current_folder_id, **args) }}">Date Modified</a>
+            </th>
+            <th style="width: 5%;">Folder</th>
+            <th style="width: 10%;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if subfolders %}
+        {% for folder_name, folder_id in subfolders %}
+        <tr class="folder-row" data-folder-path="{{ folder_id }}">
+            <td><input type="checkbox" class="item-checkbox" value="{{ folder_id }}" data-item-type="folder" data-item-id="{{ folder_id }}" data-item-name="{{ folder_name }}"></td>
+            <td class="td-name">
+                <a href="{{ url_for('folders', folder_id=folder_id, view_mode=view_mode if view_mode != 'list' else none) }}" class="d-flex align-items-center">
+                    <i class="fas fa-folder" style="font-size: 2rem; margin-right: 10px;"></i>
+                    <span title="{{ folder_name }}">{{ folder_name }}</span>
+                </a>
+            </td>
+            <td class="td-type">Folder</td>
+            <td class="td-size">--</td>
+            <td class="td-date">--</td>
+            <td class="td-folder">{{ folder_name }}</td>
+            <td class="td-actions">
+                <div class="btn-group action-buttons">
+                    <button class="btn btn-sm btn-primary rename-btn" data-bs-toggle="modal" data-bs-target="#renameModal" data-item-id="{{ folder_id }}" data-item-name="{{ folder_name }}" data-item-type="folder" title="Rename"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-item-id="{{ folder_id }}" data-item-name="{{ folder_name }}" data-item-type="folder" title="Delete"><i class="bi bi-trash"></i></button>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+        {% for item in items %}
+        <tr class="file-row" data-file-id="{{ item[0] }}">
+            <td><input type="checkbox" class="item-checkbox" value="{{ item[0] }}" data-item-type="file" data-item-id="{{ item[0] }}" data-item-name="{{ item[1] }}" data-telegram-file-id="{{ item[2] }}"></td>
+            <td class="td-name">
+                <a href="{{ url_for('preview_file', db_id=item[0]) }}" target="_blank" class="d-flex align-items-center">
+                    {% if item[7] %}
+                        <img src="{{ url_for('get_thumbnail', thumbnail_file_id=item[7]) }}" alt="Thumbnail" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
+                        {# Debug: Thumbnail ID: {{ item[7] }} #}
+                    {% else %}
+                        <i class="fas fa-file" style="font-size: 2rem; margin-right: 10px;"></i>
+                        {# Debug: No Thumbnail #}
+                    {% endif %}
+                    <span title="{{ item[1] }}">{{ item[1] }}</span>
+                </a>
+            </td>
+            <td class="td-type">{{ item[5] }}</td>
+            <td class="td-size">{{ item[4] }}</td>
+            <td class="td-date">{{ item[6].strftime('%Y-%m-%d %H:%M:%S') if item[6] else "N/A" }}</td>
+            <td class="td-folder">{{ item[3] }}</td>
+            <td class="td-actions">
+                <div class="btn-group action-buttons">
+                    <button class="btn btn-sm btn-success download-btn" data-bs-toggle="modal" data-bs-target="#downloadModal" data-telegram-file-id="{{ item[2] }}" title="Download"><i class="bi bi-download"></i></button>
+                    <button class="btn btn-sm btn-info clear-cache-btn" data-telegram-file-id="{{ item[2] }}" data-telegram-thumbnail-id="{{ item[7] if item[7] else '' }}" title="Clear Cache"><i class="bi bi-eraser"></i></button>
+                    {% if item[10] %}<a href="{{ item[10] }}" target="_blank" class="btn btn-sm btn-secondary" title="View in Telegram"><i class="bi bi-telegram"></i></a>{% endif %}
+                    <button class="btn btn-sm btn-primary rename-btn" data-bs-toggle="modal" data-bs-target="#renameModal" data-item-id="{{ item[0] }}" data-item-name="{{ item[1] }}" data-item-type="file" title="Rename"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-item-id="{{ item[0] }}" data-item-name="{{ item[1] }}" data-item-type="file" title="Delete"><i class="bi bi-trash"></i></button>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endmacro %}
+
+{% macro render_grid_view(items, subfolders) %}
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+        {% if subfolders %}
+        {% for folder_name, folder_id in subfolders %}
+        <div class="col">
+          <div class="card h-100">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center">
+              <input type="checkbox" class="form-check-input item-checkbox" data-item-type="folder" data-item-id="{{ folder_id }}">
+              <a href="{{ url_for('folders', folder_id=folder_id, view_mode=view_mode if view_mode != 'list' else none) }}" class="text-decoration-none">
+                <i class="bi bi-folder-fill" style="font-size: 4rem;"></i>
+                <p class="card-text mt-2">{{ folder_name }}</p>
+              </a>
+            </div>
+            <div class="card-footer d-flex justify-content-around">
+              <button class="btn btn-sm btn-warning rename-btn" data-bs-toggle="modal" data-bs-target="#renameModal" data-item-type="folder" data-old-name="{{ folder_name }}" data-item-id="{{ folder_id }}" title="Rename">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+              <button class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-item-type="folder" data-item-id="{{ folder_id }}" title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% for file in items %}
+        <div class="col">
+          <div class="card h-100">
+            <a href="{{ url_for('preview_file', db_id=file[0]) }}" target="_blank" class="text-decoration-none">
+            <div class="card-img-top-container text-center p-2">
+              <input type="checkbox" class="form-check-input item-checkbox" data-item-type="file" data-item-id="{{ file[0] }}" data-telegram-file-id="{{ file[2] }}">
+              {% if file[7] %}
+                <img src="{{ url_for('get_thumbnail', thumbnail_file_id=file[7]) }}" class="card-img-top" alt="Thumbnail" style="height: 150px; object-fit: contain;">
+                {# Debug: Thumbnail ID: {{ file[7] }} #}
+              {% else %}
+                <i class="bi bi-file-earmark" style="font-size: 4rem;"></i>
+                {# Debug: No Thumbnail #}
+              {% endif %}
+            </div>
+            <div class="card-body d-flex flex-column">
+              <h6 class="card-title text-truncate">{{ file[1] }}</h6>
+              <p class="card-text text-muted small mb-0">Type: {{ file[5] or "N/A" }}</p>
+              <p class="card-text text-muted small mb-0">Size: {{ file[4] or "N/A" }}</p>
+              <p class="card-text text-muted small">Upload Date: {{ file[6] or "N/A" }}</p>
+            </div>
+            </a>
+            <div class="card-footer text-center">
+              <div class="btn-group action-buttons">
+                <a href="{{ url_for('download_file', telegram_file_id=file[2]) }}" class="btn btn-sm btn-success" title="Download"><i class="bi bi-download"></i></a>
+                <button type="button" class="btn btn-sm btn-info clear-cache-btn" data-telegram-file-id="{{ file[2] }}" data-telegram-thumbnail-id="{{ file[7] if file[7] else '' }}" title="Clear Cache"><i class="bi bi-eraser"></i></button>
+                {% if file[10] %}<a href="{{ file[10] }}" target="_blank" class="btn btn-sm btn-secondary" title="View in Telegram" onclick="event.stopPropagation();"><i class="bi bi-telegram"></i></a>{% endif %}
+                <button type="button" class="btn btn-sm btn-primary rename-btn" data-bs-toggle="modal" data-bs-target="#renameModal" data-item-type="file" data-old-name="{{ file[1] }}" data-item-id="{{ file[0] }}" title="Rename"><i class="bi bi-pencil"></i></button>
+                <button type="button" class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-item-id="{{ file[0] }}" data-item-name="{{ file[1] }}" data-item-type="file" title="Delete"><i class="bi bi-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+{% endmacro %}
+
+{% macro render_gallery_view(items, subfolders) %}
+<div class="photo-gallery">
+    {# Render subfolders first #}
+    {% if subfolders %}
+        {% for folder_name, folder_id in subfolders %}
+        <a href="{{ url_for('folders', folder_id=folder_id, view_mode=view_mode if view_mode != 'list' else none) }}" class="gallery-item folder-item text-decoration-none">
+            <i class="bi bi-folder-fill folder-icon"></i>
+            <p class="folder-name">{{ folder_name }}</p>
+        </a>
+        {% endfor %}
+    {% endif %}
+
+    {# Render files #}
+    {% for file in items %}
+        {# Render all items that have a thumbnail or are images #}
+        {% if file[5] and (file[5].startswith('image/') or file[7]) %}
+            {% set is_video = file[5].startswith('video/') %}
+            <a href="{{ url_for('preview_file', db_id=file[0]) }}" target="_blank" class="gallery-item {% if is_video %}video-item{% endif %}">
+                {% if is_video %}
+                    {# For videos, use the thumbnail #}
+                    <img src="{{ url_for('get_thumbnail', thumbnail_file_id=file[7]) }}" alt="{{ file[1] }} (video thumbnail)">
+                {% else %}
+                    {# For images, link directly to the file for high quality #}
+                    <img src="{{ url_for('download_file', telegram_file_id=file[2]) }}" alt="{{ file[1] }}">
+                {% endif %}
+                <div class="file-name-overlay">{{ file[1] }}</div>
+            </a>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endmacro %}
